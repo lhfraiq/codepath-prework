@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice AI ROI Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #F5F5F5;
+      color: #111111;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    .calculator-wrapper {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .calc-header {
+      margin-bottom: 28px;
+    }
+
+    .calc-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #111111;
+    }
+
+    .calc-header p {
+      font-size: 14px;
+      color: #6B6B6B;
+      margin-top: 6px;
+      font-weight: 400;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ── PANELS ── */
+    .panel {
+      background: #FFFFFF;
+      border: 1px solid #E0E0E0;
+      border-radius: 12px;
+      padding: 28px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #111111;
+      margin-bottom: 24px;
+    }
+
+    .panel-title svg {
+      flex-shrink: 0;
+    }
+
+    /* ── TOGGLE ── */
+    .toggle-group {
+      display: flex;
+      background: #F5F5F5;
+      border: 1px solid #E0E0E0;
+      border-radius: 8px;
+      padding: 3px;
+      margin-bottom: 24px;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 8px 12px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+      background: transparent;
+      color: #6B6B6B;
+    }
+
+    .toggle-btn.active {
+      background: #111111;
+      color: #FFFFFF;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    }
+
+    /* ── SLIDER ROWS ── */
+    .slider-row {
+      margin-bottom: 22px;
+    }
+
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .slider-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6B6B6B;
+    }
+
+    .slider-badge {
+      background: #111111;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      min-width: 52px;
+      text-align: center;
+      letter-spacing: 0;
+    }
+
+    .slider-helper {
+      font-size: 12px;
+      color: #6B6B6B;
+      margin-top: 6px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: #E0E0E0;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #333333;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.22);
+      cursor: pointer;
+      transition: transform 0.12s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #333333;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.22);
+      cursor: pointer;
+    }
+
+    /* ── CHECKBOX ── */
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 22px;
+      padding: 14px;
+      background: #F5F5F5;
+      border-radius: 8px;
+      border: 1px solid #E0E0E0;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #CCCCCC;
+      border-radius: 4px;
+      background: #FFFFFF;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: background 0.15s, border-color 0.15s;
+      position: relative;
+    }
+
+    .checkbox-row input[type="checkbox"]:checked {
+      background: #111111;
+      border-color: #111111;
+    }
+
+    .checkbox-row input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 0px;
+      width: 5px;
+      height: 9px;
+      border: 2px solid #FFFFFF;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+    }
+
+    .checkbox-text {
+      flex: 1;
+    }
+
+    .checkbox-text label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #111111;
+      cursor: pointer;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .checkbox-text small {
+      font-size: 11px;
+      color: #6B6B6B;
+      line-height: 1.5;
+    }
+
+    /* ── OUTPUT PANEL ── */
+    .output-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Hours Reclaimed */
+    .card-hours {
+      background: #1A1A1A;
+      border-radius: 12px;
+      padding: 24px 28px;
+      color: #FFFFFF;
+    }
+
+    .card-hours .card-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #888888;
+      margin-bottom: 8px;
+    }
+
+    .card-hours .card-number {
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: #FFFFFF;
+      transition: color 0.2s;
+    }
+
+    .card-hours .card-unit {
+      font-size: 20px;
+      font-weight: 600;
+      color: #888888;
+      margin-left: 6px;
+    }
+
+    .card-hours .card-desc {
+      font-size: 13px;
+      color: #888888;
+      margin-top: 10px;
+      line-height: 1.55;
+    }
+
+    /* Cost Row */
+    .cost-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .card-cost {
+      background: #FFFFFF;
+      border: 1px solid #E0E0E0;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card-cost .card-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6B6B6B;
+      margin-bottom: 8px;
+    }
+
+    .card-cost .card-number {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .card-cost.current .card-number { color: #BA061F; }
+    .card-cost.ai .card-number { color: #2D6A4F; }
+
+    /* Monthly Savings */
+    .card-monthly {
+      background: #F0F0F0;
+      border-radius: 12px;
+      padding: 20px 24px;
+      border-left: 4px solid #555555;
+    }
+
+    .card-monthly .card-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6B6B6B;
+      margin-bottom: 8px;
+    }
+
+    .card-monthly .card-number {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #111111;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    /* Annual Savings */
+    .card-annual {
+      background: #111111;
+      border-radius: 12px;
+      padding: 24px 28px;
+      color: #FFFFFF;
+    }
+
+    .card-annual .card-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #888888;
+      margin-bottom: 8px;
+    }
+
+    .card-annual .card-number {
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: #FFFFFF;
+      transition: color 0.2s;
+    }
+
+    .card-annual .card-sub {
+      font-size: 13px;
+      color: #888888;
+      margin-top: 8px;
+    }
+
+    /* ── BOTTOM INFO ROW ── */
+    .info-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .info-card {
+      background: #FFFFFF;
+      border: 1px solid #E0E0E0;
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .info-card h4 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #111111;
+      margin-bottom: 6px;
+    }
+
+    .info-card p {
+      font-size: 13px;
+      color: #6B6B6B;
+      line-height: 1.55;
+    }
+
+    /* ── NUMBER TRANSITION ── */
+    .num-flash {
+      animation: numFlash 0.25s ease;
+    }
+
+    @keyframes numFlash {
+      0%   { opacity: 0.4; transform: translateY(-4px); }
+      100% { opacity: 1;   transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 767px) {
+      body { padding: 20px 12px; }
+
+      .calc-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cost-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .info-row {
+        grid-template-columns: 1fr;
+      }
+
+      .card-hours .card-number,
+      .card-annual .card-number {
+        font-size: 44px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .cost-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: #E0E0E0;
+      margin: 4px 0 22px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="calculator-wrapper">
+
+  <div class="calc-grid">
+
+    <!-- ── LEFT: INPUTS ── -->
+    <div class="panel">
+      <div class="panel-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="2" width="16" height="20" rx="2"/>
+          <line x1="8" y1="6" x2="16" y2="6"/>
+          <line x1="8" y1="10" x2="16" y2="10"/>
+          <line x1="8" y1="14" x2="12" y2="14"/>
+        </svg>
+        Your Current Setup
+      </div>
+
+      <!-- Toggle -->
+      <div class="toggle-group" role="group" aria-label="Input mode">
+        <button class="toggle-btn active" id="btn-calls" onclick="setMode('calls')">Calls Per Week</button>
+        <button class="toggle-btn" id="btn-hours" onclick="setMode('hours')">Hours Per Week</button>
+      </div>
+
+      <!-- Calls Per Week Slider -->
+      <div class="slider-row" id="row-calls">
+        <div class="slider-label-row">
+          <span class="slider-label">Calls Per Week</span>
+          <span class="slider-badge" id="badge-calls">80</span>
+        </div>
+        <input type="range" id="slider-calls" min="10" max="500" value="80"
+               aria-label="Calls per week" oninput="onSlider()" />
+        <div class="slider-helper">Assumes 5-minute average call length</div>
+      </div>
+
+      <!-- Hours Per Week Slider (hidden by default) -->
+      <div class="slider-row" id="row-hours" style="display:none;">
+        <div class="slider-label-row">
+          <span class="slider-label">Hours Per Week</span>
+          <span class="slider-badge" id="badge-hours">20</span>
+        </div>
+        <input type="range" id="slider-hours" min="1" max="100" value="20"
+               aria-label="Hours per week" oninput="onSlider()" />
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Hourly Rate Slider -->
+      <div class="slider-row">
+        <div class="slider-label-row">
+          <span class="slider-label">Hourly Rate of Phone Staff</span>
+          <span class="slider-badge" id="badge-rate">$30/hr</span>
+        </div>
+        <input type="range" id="slider-rate" min="10" max="100" value="30"
+               aria-label="Hourly rate of phone staff in dollars" oninput="onSlider()" />
+      </div>
+
+      <!-- W2 Checkbox -->
+      <div class="checkbox-row">
+        <input type="checkbox" id="chk-w2" onchange="onSlider()" />
+        <div class="checkbox-text">
+          <label for="chk-w2">Include W2 Employer Costs (+25%)</label>
+          <small>FICA (7.65%), unemployment taxes (~2%), workers' comp (~2%), and overhead (~13%)</small>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT: OUTPUTS ── -->
+    <div class="output-panel">
+
+      <!-- Hours Reclaimed -->
+      <div class="card-hours">
+        <div class="card-label">Hours Reclaimed Per Month</div>
+        <div>
+          <span class="card-number" id="out-hours">0</span><span class="card-unit">hrs</span>
+        </div>
+        <div class="card-desc">Hours your team can redirect to high-value work — closing sales, building relationships, and growing your business.</div>
+      </div>
+
+      <!-- Cost Row -->
+      <div class="cost-row">
+        <div class="card-cost current">
+          <div class="card-label">Current Monthly Cost</div>
+          <div class="card-number" id="out-current">$0</div>
+        </div>
+        <div class="card-cost ai">
+          <div class="card-label">AI Monthly Cost</div>
+          <div class="card-number" id="out-ai">$0</div>
+        </div>
+      </div>
+
+      <!-- Monthly Savings -->
+      <div class="card-monthly">
+        <div class="card-label">Monthly Savings</div>
+        <div class="card-number" id="out-monthly">$0</div>
+      </div>
+
+      <!-- Annual Savings -->
+      <div class="card-annual">
+        <div class="card-label">Annual Savings</div>
+        <div class="card-number" id="out-annual">$0</div>
+        <div class="card-sub">Projected 12-month impact</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── BOTTOM INFO ROW ── -->
+  <div class="info-row">
+    <div class="info-card">
+      <h4>Reclaimed Hours</h4>
+      <p>Time your staff reinvests in sales, customer relationships, and growth — not layoffs.</p>
+    </div>
+    <div class="info-card">
+      <h4>AI Pricing</h4>
+      <p>$0.25 per minute of call time. You only pay for what you use.</p>
+    </div>
+    <div class="info-card">
+      <h4>W2 Burden Estimate</h4>
+      <p>Includes FICA (7.65%), unemployment taxes (~2%), workers' comp (~2%), and overhead (~13%).</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var currentMode = 'calls';
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('row-calls').style.display  = mode === 'calls' ? 'block' : 'none';
+    document.getElementById('row-hours').style.display  = mode === 'hours' ? 'block' : 'none';
+    document.getElementById('btn-calls').classList.toggle('active', mode === 'calls');
+    document.getElementById('btn-hours').classList.toggle('active', mode === 'hours');
+    onSlider();
+  }
+
+  function onSlider() {
+    var calls    = parseInt(document.getElementById('slider-calls').value, 10);
+    var hours    = parseInt(document.getElementById('slider-hours').value, 10);
+    var rate     = parseInt(document.getElementById('slider-rate').value, 10);
+    var w2       = document.getElementById('chk-w2').checked;
+
+    // Update badges
+    document.getElementById('badge-calls').textContent = calls;
+    document.getElementById('badge-hours').textContent = hours;
+    document.getElementById('badge-rate').textContent  = '$' + rate + '/hr';
+    // Update slider track fill
+    updateTrack('slider-calls', 10, 500, calls);
+    updateTrack('slider-hours', 1, 100, hours);
+    updateTrack('slider-rate',  10, 100, rate);
+
+    // Step 1: monthly hours per person
+    var monthlyHoursPerPerson;
+    if (currentMode === 'calls') {
+      monthlyHoursPerPerson = calls * 5 / 60 * 4.33;
+    } else {
+      monthlyHoursPerPerson = hours * 4.33;
+    }
+
+    // Step 2: total monthly hours
+    var totalMonthlyHours = monthlyHoursPerPerson;
+
+    // Step 3: current monthly cost
+    var baseCost = totalMonthlyHours * rate;
+    var currentMonthlyCost = w2 ? baseCost * 1.25 : baseCost;
+
+    // Step 4: AI monthly cost (based on per-person hours only, not team-scaled)
+    var aiMonthlyMinutes = monthlyHoursPerPerson * 60;
+    var aiMonthlyCost = aiMonthlyMinutes * 0.25;
+
+    // Step 5 & 6
+    var monthlySavings = currentMonthlyCost - aiMonthlyCost;
+    var annualSavings  = monthlySavings * 12;
+
+    // Step 7
+    var hoursReclaimed = Math.round(totalMonthlyHours);
+
+    // Update outputs with animation
+    setOutput('out-hours',   hoursReclaimed);
+    setOutput('out-current', fmt(currentMonthlyCost));
+    setOutput('out-ai',      fmt(aiMonthlyCost));
+    setOutput('out-monthly', fmt(monthlySavings));
+    setOutput('out-annual',  fmt(annualSavings));
+  }
+
+  function fmt(val) {
+    var n = Math.round(val);
+    if (n < 0) return '-$' + Math.abs(n).toLocaleString('en-US');
+    return '$' + n.toLocaleString('en-US');
+  }
+
+  function setOutput(id, val) {
+    var el = document.getElementById(id);
+    var newText = typeof val === 'number' ? val.toLocaleString('en-US') : val;
+    if (el.textContent !== newText) {
+      el.textContent = newText;
+      el.classList.remove('num-flash');
+      void el.offsetWidth; // reflow
+      el.classList.add('num-flash');
+    }
+  }
+
+  function updateTrack(id, min, max, val) {
+    var el = document.getElementById(id);
+    var pct = ((val - min) / (max - min)) * 100;
+    el.style.background = 'linear-gradient(to right, #333333 ' + pct + '%, #E0E0E0 ' + pct + '%)';
+  }
+
+  // Init
+  onSlider();
+</script>
+
+</body>
+</html>
